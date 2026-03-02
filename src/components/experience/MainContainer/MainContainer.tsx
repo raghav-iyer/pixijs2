@@ -52,7 +52,7 @@ export const MainContainer = ({
     [canvassize.width, canvassize.height]
   );
 
-  const charScale = (canvassize.height / 600) * 0.8;
+  const charScale = (canvassize.height / 600) * 0.8 * 1.3;
   const assets = characterAssets[selectedCharacter];
 
   return (
