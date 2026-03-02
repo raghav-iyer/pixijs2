@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Experience } from "./components/experience/experiennce";
 import { CharacterSelect } from "./components/CharacterSelect/CharacterSelect";
 import { useForcePortraitLandscape } from "./hooks/useForcePortraitLandscape";
+import { GameProvider } from "./game/GameContext";
 
 const App = () => {
   const [selectedCharacter, setSelectedCharacter] = useState<string | null>(null);
@@ -12,7 +13,9 @@ const App = () => {
       {!selectedCharacter ? (
         <CharacterSelect onSelect={setSelectedCharacter} />
       ) : (
-        <Experience selectedCharacter={selectedCharacter} />
+        <GameProvider>
+          <Experience selectedCharacter={selectedCharacter} />
+        </GameProvider>
       )}
     </div>
   );

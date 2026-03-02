@@ -31,12 +31,16 @@ interface MainContainerProps {
   };
   selectedCharacter: string;
   inputRef: RefObject<{ dx: number; dy: number }>;
+  onZoneChange?: (zone: string | null) => void;
+  onInteract?: () => void;
 }
 
 export const MainContainer = ({
   canvassize,
   selectedCharacter,
   inputRef,
+  onZoneChange,
+  onInteract,
   children,
 }: PropsWithChildren<MainContainerProps>) => {
   const [bgTexture, setBgTexture] = useState<Texture | null>(null);
@@ -80,6 +84,8 @@ export const MainContainer = ({
           canvasHeight={canvassize.height}
           inputRef={inputRef}
           collisionBoxes={collisionBoxes}
+          onZoneChange={onZoneChange}
+          onInteract={onInteract}
         />
       )}
 

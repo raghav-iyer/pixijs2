@@ -7,6 +7,7 @@ import {
   Texture,
 } from "pixi.js";
 import { type CollisionBox, overlaps } from "../../collisions";
+import { detectZone } from "../../game/zones";
 
 extend({ AnimatedSprite });
 
@@ -22,6 +23,8 @@ interface CharacterProps {
   canvasHeight: number;
   inputRef: RefObject<{ dx: number; dy: number }>;
   collisionBoxes: CollisionBox[];
+  onZoneChange?: (zone: string | null) => void;
+  onInteract?: () => void;
 }
 
 function sliceFrames(
@@ -56,6 +59,8 @@ export const Character = ({
   canvasHeight,
   inputRef,
   collisionBoxes,
+  onZoneChange,
+  onInteract,
 }: CharacterProps) => {
   const walkFramesRef = useRef<Texture[]>([]);
   const idleFramesRef = useRef<Texture[]>([]);
@@ -66,6 +71,7 @@ export const Character = ({
   const keysRef = useRef(new Set<string>());
   const spriteRef = useRef<AnimatedSprite | null>(null);
   const isMovingRef = useRef(false);
+  const lastZoneRef = useRef<string | null>(null);
 
   // Load sprite sheets
   useEffect(() => {
@@ -100,6 +106,10 @@ export const Character = ({
         e.preventDefault();
         keysRef.current.add(e.key);
         syncKeysToInput();
+      }
+      if ((e.key === 'e' || e.key === 'E' || e.key === ' ') && onInteract) {
+        e.preventDefault();
+        onInteract();
       }
     };
     const onKeyUp = (e: KeyboardEvent) => {
@@ -195,6 +205,15 @@ export const Character = ({
       sprite.textures = idleFrames;
       sprite.gotoAndStop(0);
       isMovingRef.current = false;
+    }
+
+    // Zone detection
+    if (onZoneChange) {
+      const zone = detectZone(posRef.current.x, posRef.current.y, canvasWidth, canvasHeight);
+      if (zone !== lastZoneRef.current) {
+        lastZoneRef.current = zone;
+        onZoneChange(zone);
+      }
     }
   });
 
