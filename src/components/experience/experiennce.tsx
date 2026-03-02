@@ -1,10 +1,16 @@
 import { Application } from '@pixi/react'
-import { useEffect, useCallback, useState } from 'react';
+import { useEffect, useCallback, useState, useRef } from 'react';
 import { CalculateCanvasSize } from '../../helpers/common';
 import { MainContainer } from './MainContainer/MainContainer';
+import { Joystick } from '../Joystick/Joystick';
 
-export const Experience = () => {
+interface ExperienceProps {
+  selectedCharacter: string;
+}
+
+export const Experience = ({ selectedCharacter }: ExperienceProps) => {
   const [canvasSize, setCanvasSize] = useState(CalculateCanvasSize());
+  const inputRef = useRef({ dx: 0, dy: 0 });
 
   const updateCanvasSize = useCallback(() => {
     setCanvasSize(CalculateCanvasSize());
@@ -18,13 +24,19 @@ export const Experience = () => {
   }, [updateCanvasSize]);
 
   return (
-    <Application
-      width={canvasSize.width}
-      height={canvasSize.height}
-      // use whatever color you’d like; 0x000000 is black, 0xffffff white, etc.
-      background={0x000000}
-    >
-      <MainContainer canvassize={canvasSize} />
-    </Application>
+    <>
+      <Application
+        width={canvasSize.width}
+        height={canvasSize.height}
+        background={0x000000}
+      >
+        <MainContainer
+          canvassize={canvasSize}
+          selectedCharacter={selectedCharacter}
+          inputRef={inputRef}
+        />
+      </Application>
+      <Joystick inputRef={inputRef} />
+    </>
   );
 };
