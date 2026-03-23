@@ -13,3 +13,14 @@ export const CalculateCanvasSize = () => {
 
   return { width: vw, height: vh };
 };
+
+// Safe area insets — keeps the character visible between HUD and controls
+export const HUD_HEIGHT = 44;
+export const BOTTOM_CONTROLS_HEIGHT = 110;
+
+export const getSafeArea = (canvasW: number, canvasH: number) => ({
+  top: HUD_HEIGHT,
+  bottom: BOTTOM_CONTROLS_HEIGHT,
+  playableHeight: canvasH - HUD_HEIGHT - BOTTOM_CONTROLS_HEIGHT,
+  width: canvasW,
+});

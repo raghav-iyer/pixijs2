@@ -8,6 +8,7 @@ import {
 } from "pixi.js";
 import { type CollisionBox, overlaps } from "../../collisions";
 import { detectZone } from "../../game/zones";
+import { HUD_HEIGHT, BOTTOM_CONTROLS_HEIGHT } from "../../helpers/common";
 
 extend({ AnimatedSprite });
 
@@ -42,10 +43,7 @@ function sliceFrames(
 }
 
 const ARROW_KEYS = new Set(["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"]);
-const SPEED = 3;
-// Player hitbox size (fraction of canvas height, centered on sprite anchor)
-const HITBOX_W = 20;
-const HITBOX_H = 10;
+const SPEED = 1.5;
 
 export const Character = ({
   walkSheetUrl,
@@ -146,6 +144,10 @@ export const Character = ({
     let dy = inputRef.current!.dy;
     const moving = dx !== 0 || dy !== 0;
 
+    // Scale hitbox to canvas size
+    const HITBOX_W = Math.max(16, canvasWidth * 0.03);
+    const HITBOX_H = Math.max(8, canvasHeight * 0.015);
+
     // Position update
     if (moving) {
       const dt = ticker.deltaTime;
@@ -157,12 +159,18 @@ export const Character = ({
         dy /= len;
       }
 
-      const newX = posRef.current.x + SPEED * dx * dt;
-      const newY = posRef.current.y + SPEED * dy * dt;
+      // Scale speed to canvas size for consistent feel across devices
+      const scaledSpeed = SPEED * (canvasHeight / 400);
+      const newX = posRef.current.x + scaledSpeed * dx * dt;
+      const newY = posRef.current.y + scaledSpeed * dy * dt;
 
       // Collision check per-axis (allows wall sliding)
       // Player hitbox: centered on x, bottom-anchored on y
       const hbHalfW = HITBOX_W / 2;
+
+      // Clamp to safe area (between HUD and bottom controls)
+      const minY = HUD_HEIGHT + HITBOX_H;
+      const maxY = canvasHeight - BOTTOM_CONTROLS_HEIGHT;
 
       // Try X axis
       const tryX = Math.max(HITBOX_W, Math.min(canvasWidth - HITBOX_W, newX));
@@ -175,8 +183,8 @@ export const Character = ({
       }
       if (!blockedX) posRef.current.x = tryX;
 
-      // Try Y axis
-      const tryY = Math.max(HITBOX_H, Math.min(canvasHeight - HITBOX_H, newY));
+      // Try Y axis — clamped to safe area
+      const tryY = Math.max(minY, Math.min(maxY, newY));
       let blockedY = false;
       for (const box of collisionBoxes) {
         if (overlaps(posRef.current.x - hbHalfW, tryY - HITBOX_H, HITBOX_W, HITBOX_H, box)) {

@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useMemo, useRef, useState, useEffect } from 'react';
 import { useGame } from '../../game/GameContext';
 import { getZoneNeeds } from '../../game/zoneNeeds';
-import { ZONE_COLORS, ZONE_LABELS, glassmorphism } from '../../game/theme';
+import { ZONE_COLORS, ZONE_LABELS, ZONE_ICONS, glassmorphism } from '../../game/theme';
 
 interface ZonePromptProps {
   interactFeedback: 'none' | 'ok' | 'not-needed';
@@ -12,10 +12,22 @@ export function ZonePrompt({ interactFeedback }: ZonePromptProps) {
   const { currentZone, activePanel } = state;
   const needs = useMemo(() => getZoneNeeds(state), [state]);
 
+  // Track zone changes for bounce-in animation
+  const prevZoneRef = useRef(currentZone);
+  const [bounceKey, setBounceKey] = useState(0);
+
+  useEffect(() => {
+    if (currentZone && currentZone !== prevZoneRef.current) {
+      setBounceKey(k => k + 1);
+    }
+    prevZoneRef.current = currentZone;
+  }, [currentZone]);
+
   if (!currentZone || activePanel) return null;
 
   const color = ZONE_COLORS[currentZone];
   const label = ZONE_LABELS[currentZone];
+  const icon = ZONE_ICONS[currentZone];
   const need = needs[currentZone];
 
   const shakeClass = interactFeedback === 'not-needed' ? 'prompt-shake' : '';
@@ -25,6 +37,7 @@ export function ZonePrompt({ interactFeedback }: ZonePromptProps) {
     <>
       <style>{promptAnimations}</style>
       <div
+        key={bounceKey}
         className={`${shakeClass} ${flashClass}`}
         style={{
           position: 'fixed',
@@ -40,23 +53,25 @@ export function ZonePrompt({ interactFeedback }: ZonePromptProps) {
           zIndex: 90,
           fontFamily: 'system-ui, -apple-system, sans-serif',
           boxShadow: need.urgent
-            ? `0 0 24px ${color}40, 0 0 8px ${color}20`
+            ? `0 0 28px ${color}50, 0 0 10px ${color}30`
             : `0 0 20px ${color}15`,
           borderColor: need.urgent ? `${color}aa` : `${color}40`,
           minWidth: 200,
+          animation: 'zonePromptBounceIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
         }}
       >
-        {/* Top row: zone name */}
+        {/* Top row: zone icon + name */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <span style={{ fontSize: 16 }}>{icon}</span>
           <span style={{
-            width: 8,
-            height: 8,
+            width: 12,
+            height: 12,
             borderRadius: '50%',
             background: color,
-            boxShadow: need.urgent ? `0 0 10px ${color}` : `0 0 4px ${color}80`,
+            boxShadow: need.urgent ? `0 0 12px ${color}, 0 0 4px ${color}` : `0 0 6px ${color}80`,
             animation: need.urgent ? 'dotPulse 1s ease-in-out infinite' : 'none',
           }} />
-          <span style={{ color: '#e2e8f0', fontSize: 14, fontWeight: 600 }}>
+          <span style={{ color: '#e2e8f0', fontSize: 15, fontWeight: 700 }}>
             {label}
           </span>
         </div>
@@ -118,6 +133,11 @@ export function NoZoneHint({ visible }: { visible: boolean }) {
 }
 
 const promptAnimations = `
+@keyframes zonePromptBounceIn {
+  0% { transform: translateX(-50%) scale(0.6) translateY(12px); opacity: 0; }
+  60% { transform: translateX(-50%) scale(1.06) translateY(-3px); opacity: 1; }
+  100% { transform: translateX(-50%) scale(1) translateY(0); opacity: 1; }
+}
 @keyframes prompt-shake {
   0%, 100% { transform: translateX(-50%); }
   10%, 50%, 90% { transform: translateX(calc(-50% - 4px)); }
@@ -127,15 +147,15 @@ const promptAnimations = `
   animation: prompt-shake 0.4s ease !important;
 }
 @keyframes prompt-flash-glow {
-  0% { box-shadow: 0 0 20px rgba(34,197,94,0.5); }
+  0% { box-shadow: 0 0 24px rgba(34,197,94,0.6); }
   100% { box-shadow: none; }
 }
 .prompt-flash {
   animation: prompt-flash-glow 0.5s ease !important;
 }
 @keyframes dotPulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.4); }
+  0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 6px currentColor; }
+  50% { opacity: 0.5; transform: scale(1.5); box-shadow: 0 0 14px currentColor; }
 }
 @keyframes fadeIn {
   from { opacity: 0; }

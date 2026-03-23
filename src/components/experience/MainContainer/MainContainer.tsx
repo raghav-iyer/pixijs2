@@ -4,6 +4,7 @@ import { Assets, Container, Sprite, Texture } from "pixi.js";
 import bgsceneUrl from "../../../../images/office.png";
 import { Character } from "../../Player/Character";
 import { getCollisionBoxes } from "../../../collisions";
+import { getSafeArea } from "../../../helpers/common";
 
 // Character sprite sheet imports
 import walk1Url from "../../../../images/characters/City_men_1/Walk.png";
@@ -56,7 +57,8 @@ export const MainContainer = ({
     [canvassize.width, canvassize.height]
   );
 
-  const charScale = (canvassize.height / 600) * 0.8 * 1.3;
+  const safeArea = getSafeArea(canvassize.width, canvassize.height);
+  const charScale = (safeArea.playableHeight / 600) * 0.8 * 1.3;
   const assets = characterAssets[selectedCharacter];
 
   return (
@@ -78,7 +80,7 @@ export const MainContainer = ({
           walkFrameCount={WALK_FRAMES}
           idleFrameCount={IDLE_FRAMES}
           startX={canvassize.width * 0.5}
-          startY={canvassize.height * 0.5}
+          startY={safeArea.top + safeArea.playableHeight * 0.5}
           scale={charScale}
           canvasWidth={canvassize.width}
           canvasHeight={canvassize.height}

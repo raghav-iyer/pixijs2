@@ -1,6 +1,6 @@
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import { useGame } from '../../game/GameContext';
-import { ZONE_COLORS, ZONE_LABELS, COLORS } from '../../game/theme';
+import { ZONE_COLORS, ZONE_LABELS, COLORS, sharedKeyframes } from '../../game/theme';
 import type { ZoneId } from '../../game/types';
 
 interface PanelOverlayProps {
@@ -12,6 +12,7 @@ export function PanelOverlay({ zone, children }: PanelOverlayProps) {
   const { dispatch } = useGame();
   const color = ZONE_COLORS[zone];
   const label = ZONE_LABELS[zone];
+  const touchHandledRef = useRef(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -21,34 +22,67 @@ export function PanelOverlay({ zone, children }: PanelOverlayProps) {
     return () => window.removeEventListener('keydown', onKey);
   }, [dispatch]);
 
+  const closePanel = () => dispatch({ type: 'CLOSE_PANEL' });
+
+  const handleBackdropTouch = (e: React.TouchEvent) => {
+    e.preventDefault();
+    touchHandledRef.current = true;
+    closePanel();
+  };
+
+  const handleBackdropClick = () => {
+    if (touchHandledRef.current) {
+      touchHandledRef.current = false;
+      return;
+    }
+    closePanel();
+  };
+
   return (
-    <div style={backdropStyle} onClick={() => dispatch({ type: 'CLOSE_PANEL' })}>
+    <>
+      <style>{sharedKeyframes}{panelKeyframes}</style>
       <div
-        style={{
-          ...cardStyle,
-          border: `1px solid ${color}66`,
-          boxShadow: `0 0 40px ${color}15, 0 8px 32px rgba(0,0,0,0.4)`,
-        }}
-        onClick={e => e.stopPropagation()}
+        style={backdropStyle}
+        onClick={handleBackdropClick}
+        onTouchStart={handleBackdropTouch}
       >
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, boxShadow: `0 0 10px ${color}` }} />
-            <h2 style={{ margin: 0, color: COLORS.textPrimary, fontSize: 20, fontWeight: 700 }}>{label}</h2>
+        <div
+          style={{
+            ...cardStyle,
+            border: `1px solid ${color}66`,
+            boxShadow: `0 0 40px ${color}15, 0 8px 32px rgba(0,0,0,0.4)`,
+            animation: 'slideUpBounce 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
+          }}
+          onClick={e => e.stopPropagation()}
+          onTouchStart={e => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, boxShadow: `0 0 10px ${color}` }} />
+              <h2 style={{ margin: 0, color: COLORS.textPrimary, fontSize: 20, fontWeight: 700 }}>{label}</h2>
+            </div>
+            <button
+              onClick={closePanel}
+              onTouchStart={(e) => { e.preventDefault(); e.stopPropagation(); closePanel(); }}
+              style={closeButtonStyle}
+            >
+              ✕
+            </button>
           </div>
-          <button
-            onClick={() => dispatch({ type: 'CLOSE_PANEL' })}
-            style={closeButtonStyle}
-          >
-            ✕
-          </button>
+          {children}
         </div>
-        {children}
       </div>
-    </div>
+    </>
   );
 }
+
+const panelKeyframes = `
+@keyframes panelBackdropFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+`;
 
 const backdropStyle: React.CSSProperties = {
   position: 'fixed',
@@ -61,6 +95,8 @@ const backdropStyle: React.CSSProperties = {
   justifyContent: 'center',
   zIndex: 200,
   fontFamily: 'system-ui, -apple-system, sans-serif',
+  touchAction: 'none',
+  animation: 'panelBackdropFade 0.2s ease',
 };
 
 const cardStyle: React.CSSProperties = {
@@ -88,4 +124,5 @@ const closeButtonStyle: React.CSSProperties = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
+  touchAction: 'none',
 };

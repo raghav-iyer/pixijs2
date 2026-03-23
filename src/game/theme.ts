@@ -47,3 +47,77 @@ export const buttonStyle = (accentColor: string): React.CSSProperties => ({
   fontWeight: 600,
   transition: 'all 0.2s',
 });
+
+// Zone emoji icons for kid-friendly labels
+export const ZONE_ICONS: Record<NonNullable<ZoneId>, string> = {
+  tech: '⚙️',
+  ceo: '💼',
+  language: '🌍',
+  toilet: '💧',
+};
+
+// Kid-friendly fun colors
+export const FUN_COLORS = {
+  celebration: '#ffd700',
+  sparkle: '#fff176',
+  fun1: '#ff6b6b',
+  fun2: '#48dbfb',
+  fun3: '#ff9ff3',
+  fun4: '#feca57',
+  fun5: '#54a0ff',
+};
+
+// Easing presets
+export const EASING = {
+  bounceIn: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
+  springIn: 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+  snapOut: 'cubic-bezier(0.22, 1, 0.36, 1)',
+};
+
+// Shared keyframe CSS for reuse across components
+export const sharedKeyframes = `
+@keyframes bounceIn {
+  0% { transform: scale(0) translateY(20px); opacity: 0; }
+  60% { transform: scale(1.1) translateY(-4px); opacity: 1; }
+  100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-3deg); }
+  75% { transform: rotate(3deg); }
+}
+@keyframes sparkle {
+  0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+  50% { opacity: 1; transform: scale(1) rotate(180deg); }
+}
+@keyframes rainbowText {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(360deg); }
+}
+@keyframes gentleFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(255,215,0,0.3); }
+  50% { box-shadow: 0 0 24px rgba(255,215,0,0.6); }
+}
+@keyframes slideUpBounce {
+  0% { transform: translateY(100%) scale(0.95); opacity: 0; }
+  60% { transform: translateY(-8px) scale(1.02); opacity: 1; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes bounceScale {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+@keyframes coinFloat {
+  0% { transform: translateY(0) scale(1); opacity: 1; }
+  100% { transform: translateY(-40px) scale(0.5); opacity: 0; }
+}
+`;

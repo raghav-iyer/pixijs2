@@ -6,10 +6,10 @@ const AUTO_DISMISS_MS = 5000;
 const MAX_VISIBLE = 3;
 
 const TYPE_CONFIG = {
-  success: { color: COLORS.success, icon: '✓', label: 'SUCCESS' },
-  error: { color: COLORS.error, icon: '✕', label: 'FAILED' },
-  warning: { color: COLORS.warning, icon: '!', label: 'WARNING' },
-  info: { color: COLORS.info, icon: 'i', label: 'INFO' },
+  success: { color: COLORS.success, icon: '✅', label: 'SUCCESS' },
+  error: { color: COLORS.error, icon: '❌', label: 'FAILED' },
+  warning: { color: COLORS.warning, icon: '⚠️', label: 'WARNING' },
+  info: { color: COLORS.info, icon: 'ℹ️', label: 'INFO' },
 } as const;
 
 export function NotificationToast() {
@@ -44,12 +44,16 @@ export function NotificationToast() {
               key={n.id}
               style={{
                 ...toastStyle,
-                border: `1.5px solid ${config.color}88`,
-                boxShadow: `0 0 12px ${config.color}22, 0 4px 20px rgba(0,0,0,0.5)`,
+                border: `1.5px solid ${config.color}cc`,
+                boxShadow: `0 0 16px ${config.color}30, 0 4px 20px rgba(0,0,0,0.5)`,
               }}
               onClick={() => dispatch({ type: 'DISMISS_NOTIFICATION', id: n.id })}
+              onTouchStart={(e) => {
+                e.preventDefault();
+                dispatch({ type: 'DISMISS_NOTIFICATION', id: n.id });
+              }}
             >
-              {/* Type badge + icon */}
+              {/* Type badge + emoji icon */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
@@ -57,16 +61,8 @@ export function NotificationToast() {
                 marginBottom: 4,
               }}>
                 <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  width: 20,
-                  height: 20,
-                  borderRadius: '50%',
-                  background: `${config.color}25`,
-                  color: config.color,
-                  fontSize: 11,
-                  fontWeight: 800,
+                  fontSize: 16,
+                  lineHeight: 1,
                   flexShrink: 0,
                 }}>
                   {config.icon}
@@ -98,14 +94,14 @@ export function NotificationToast() {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                height: 2,
+                height: 3,
                 borderRadius: '0 0 10px 10px',
                 overflow: 'hidden',
               }}>
                 <div style={{
                   height: '100%',
                   background: config.color,
-                  opacity: 0.5,
+                  opacity: 0.6,
                   animation: `notifShrink ${AUTO_DISMISS_MS}ms linear forwards`,
                 }} />
               </div>
@@ -118,9 +114,10 @@ export function NotificationToast() {
 }
 
 const notificationKeyframes = `
-  @keyframes notifSlideIn {
-    0% { transform: translateX(100%); opacity: 0; }
-    100% { transform: translateX(0); opacity: 1; }
+  @keyframes notifBounceIn {
+    0% { transform: translateY(16px) scale(0.85); opacity: 0; }
+    60% { transform: translateY(-4px) scale(1.03); opacity: 1; }
+    100% { transform: translateY(0) scale(1); opacity: 1; }
   }
   @keyframes notifShrink {
     0% { width: 100%; }
@@ -151,6 +148,7 @@ const toastStyle: React.CSSProperties = {
   borderRadius: 10,
   padding: '12px 16px',
   cursor: 'pointer',
-  animation: 'notifSlideIn 0.3s ease-out',
+  animation: 'notifBounceIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
   overflow: 'hidden',
+  touchAction: 'none',
 };
